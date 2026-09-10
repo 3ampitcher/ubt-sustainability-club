@@ -117,16 +117,16 @@ img { display: block; max-width: 100%; }
 }
 
 /* ── 1 · Logo ─────────────────────────────────────────────────────────── */
-.mast { display: flex; justify-content: flex-end; min-height: 46px; }
+.mast { display: flex; justify-content: flex-start; min-height: 40px; }
 /* The supplied logo file is a square canvas with wide blank margins around
    the mark (artwork 704x332 inside 1100x1042). The box below shows only the
    artwork region — the file and the mark itself are untouched, we just stop
    rendering the empty canvas around it. */
 .logo-box { display: block; overflow: hidden; aspect-ratio: 1100 / 380; flex: none; }
 .logo-box img { width: 100%; height: 100%; object-fit: cover; }
-.logo-mast { width: 150px; }
+.logo-mast { width: 124px; }
 .logo-screen { margin-left: auto; width: 104px; }
-.mast-fallback { display: grid; justify-items: end; line-height: 1.02; }
+.mast-fallback { display: grid; justify-items: start; line-height: 1.02; }
 .mast-fallback b { font-size: 25px; font-weight: 800; letter-spacing: -.02em; color: var(--navy-2); }
 .mast-fallback i { font-style: normal; font-size: 11px; font-weight: 700; color: var(--navy-2); }
 
@@ -291,11 +291,6 @@ img { display: block; max-width: 100%; }
 }
 .gcard-go { width: 18px; height: 18px; flex: none; margin-left: auto; color: var(--slate-2); }
 .gcard:hover .gcard-go { color: var(--green); }
-
-/* ── Footer ─────────────────────────────────────────────────────────────── */
-.foot { text-align: center; display: grid; gap: 4px; margin-top: 6px; padding-top: 16px; border-top: 1px solid var(--line); }
-.foot p { margin: 0; font-size: 12.5px; color: var(--slate); }
-.foot-fine { font-family: var(--mono); font-size: 9.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--slate-2); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -695,3 +690,19 @@ img { display: block; max-width: 100%; }
 
 /* Reserve two lines for the longest game name so every tile ends level. */
 .gcard-name { min-height: 2.3em; }
+
+/* The supplied TikTok icon has the word "TikTok" set inside it, so the tile
+   read "TikTok" twice — once in the art, once in the label under it, unlike
+   the clean Instagram and LinkedIn marks. Show only the note glyph (the
+   wordmark sits below y=190 of 256) on the icon's own black tile. */
+.soc[data-net="tt"] .soc-mark {
+  overflow: hidden;
+  border-radius: 11px;
+  background: #0F0F14;
+}
+.soc[data-net="tt"] .soc-mark img {
+  width: 55.6px;
+  height: 55.6px;
+  max-width: none;
+  margin: -1.3px 0 0 -7.8px;
+}
