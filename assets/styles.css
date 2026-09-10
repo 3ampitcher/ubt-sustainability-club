@@ -160,6 +160,7 @@ img { display: block; max-width: 100%; }
 .cta b { font-size: 19px; font-weight: 700; letter-spacing: -.015em; text-align: center; }
 .cta-mark { display: grid; place-items: center; }
 .cta-mark svg { width: 30px; height: 30px; }
+.cta-mark img { width: 30px; height: 30px; object-fit: contain; }
 .cta-go { display: grid; place-items: center; opacity: .72; }
 .cta-go svg { width: 21px; height: 21px; }
 
@@ -206,12 +207,11 @@ img { display: block; max-width: 100%; }
   transition: transform .15s cubic-bezier(.2,.8,.2,1), border-color .15s ease;
 }
 .soc b { font-size: 13px; font-weight: 600; color: var(--navy); }
-.soc-mark { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; }
-.soc-mark svg { width: 23px; height: 23px; }
+/* Each supplied icon already carries its own brand tile, so it is shown
+   whole rather than sitting on a colour we invent for it. */
+.soc-mark { width: 40px; height: 40px; display: block; }
+.soc-mark img { width: 100%; height: 100%; object-fit: contain; }
 .soc:hover { transform: translateY(-2px); border-color: var(--line-2); }
-.soc[data-net="ig"] .soc-mark { background: linear-gradient(140deg, #F9CE34, #EE2A7B 52%, #6228D7); color: #fff; }
-.soc[data-net="tt"] .soc-mark { background: #0F0F14; color: #fff; }
-.soc[data-net="li"] .soc-mark { background: #0A66C2; color: #fff; }
 
 /* ── 8 · Pick a Game ────────────────────────────────────────────────────── */
 .play { display: grid; gap: 14px; margin-top: 4px; }

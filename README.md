@@ -16,19 +16,24 @@ about themselves.
 │   ├── hub.js          logo fallback
 │   ├── art.svg.html    source of the card illustrations (edit here, then paste into index.html)
 │   ├── fonts/          Archivo + IBM Plex Mono, self-hosted
-│   └── logo.jpg        ← THE OFFICIAL CLUB LOGO GOES HERE
+│   ├── logo.jpg        the official club logo, used as supplied
+│   └── social-*.png    Instagram, TikTok, LinkedIn and WhatsApp marks
 └── README.md
 ```
 
-## 1. Add the logo
+## Brand assets
 
-Put the official club logo in `assets/` named exactly `logo.jpg`. It is shown as
-supplied and is never redrawn, recoloured or re-lettered by the site. It appears
-top-right and as the browser tab icon.
+`assets/logo.jpg` is the official club logo, shown exactly as supplied — never
+redrawn, recoloured or re-lettered. The supplied file is a square canvas with
+wide blank margins (the artwork is 704x332 inside 1100x1042), so the header
+shows only the artwork region via CSS. The file itself is untouched; replacing
+it with a tightly cropped version would work too — adjust `--logo-crop` ratio
+in `.logo-box` if you do.
 
-From a browser: repo → `assets` → **Add file → Upload files** → drag it in →
-**Commit changes**. Until it is there, a plain text wordmark shows in its place
-so the page never displays a broken image.
+The social marks in `assets/social-*.{png,webp}` each carry their own brand
+tile, so they are shown whole rather than placed on a colour we invent.
+Instagram and TikTok arrived at 5001px and 2000px square (1.3 MB and 35 KB);
+both were resized to 256px for the web, which is all the page needs.
 
 ## 2. Publish
 
