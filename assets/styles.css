@@ -296,67 +296,83 @@ img { display: block; max-width: 100%; }
 }
 
 /* ==========================================================================
-   Game overlay
+   Game screen — a full sheet, not a dialog box, so a phone gets the whole
+   screen and a laptop gets the same sheet centred.
    ========================================================================== */
-.overlay {
+.screen {
   position: fixed;
   inset: 0;
   z-index: 50;
-  background: rgba(20, 32, 74, .48);
+  background: rgba(20, 32, 74, .5);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 12px;
+  padding: 0;
 }
-.overlay[hidden] { display: none; }
+.screen[hidden] { display: none; }
+@media (min-width: 520px) { .screen { padding: 22px; } }
 
-.panel {
-  width: min(560px, 100%);
-  max-height: calc(100dvh - 24px);
+.screen-inner {
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  height: 100dvh;
   background: var(--paper);
-  border-radius: var(--r-xl);
-  box-shadow: var(--sh-3);
   display: flex;
   flex-direction: column;
   overflow: hidden;
   animation: rise .2s cubic-bezier(.2,.8,.2,1);
 }
-@keyframes rise { from { transform: translateY(10px) scale(.985); opacity: 0; } }
+@keyframes rise { from { transform: translateY(12px); opacity: 0; } }
+@media (min-width: 520px) {
+  .screen-inner { height: min(860px, calc(100dvh - 44px)); border-radius: var(--r-xl); box-shadow: var(--sh-3); }
+}
 
-.panel-head {
+.screen-top {
   flex: none;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px 16px;
+  padding: 12px 16px;
   border-bottom: 1px solid var(--line);
 }
-.panel-kicker {
-  margin: 0 0 2px;
-  font-family: var(--mono);
-  font-size: 9.5px;
+.back {
+  font: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px 8px 8px;
+  border: none;
+  background: transparent;
+  border-radius: var(--pill);
+  color: var(--navy);
+  font-size: 14px;
   font-weight: 600;
-  letter-spacing: .13em;
-  text-transform: uppercase;
-  color: var(--green);
-}
-.panel-title { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -.02em; color: var(--navy); }
-.panel-close {
-  margin-left: auto;
-  width: 40px; height: 40px; flex: none;
-  display: grid; place-items: center;
-  border-radius: 12px;
-  border: 1px solid var(--line);
-  background: var(--paper);
-  color: var(--slate);
   cursor: pointer;
 }
-.panel-close:hover { background: var(--mist); color: var(--navy); }
-.panel-close svg { width: 21px; height: 21px; }
+.back svg { width: 19px; height: 19px; }
+.back:hover { background: var(--mist); }
+.screen-logo { margin-left: auto; width: 88px; height: auto; }
 
-.stage { position: relative; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.screen-body { position: relative; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+
+/* ── The artwork block ──────────────────────────────────────────────────
+   The SVG illustration is the floor; a real photo at assets/games/<id>.jpg
+   sits on top of it when one exists. */
+.art { position: relative; display: block; line-height: 0; width: 100%; }
+.art > svg,
+.art > .art-photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 160 / 100;
+  object-fit: cover;
+}
+.art > .art-photo { position: absolute; inset: 0; }
+
+/* ── Playfield and HUD ──────────────────────────────────────────────────── */
 .stage-hud {
   flex: none;
   min-height: 44px;
@@ -377,14 +393,12 @@ img { display: block; max-width: 100%; }
   flex: 1 1 auto;
   min-height: 0;
   width: 100%;
-  aspect-ratio: 4 / 3;
   background: var(--mist);
   overflow: hidden;
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
 }
-@media (max-height: 700px) { .stage-field { aspect-ratio: 16 / 9; } }
 .game-canvas { position: absolute; inset: 0; display: block; touch-action: none; }
 
 .hud-chip {
@@ -403,28 +417,157 @@ img { display: block; max-width: 100%; }
 .hud-bar.warn > i { background: var(--amber); }
 .hud-bar.danger > i { background: var(--danger); }
 
+/* ── The sheet that covers the field (start screen / result screen) ─────── */
 .curtain {
-  position: absolute; inset: 0; z-index: 5;
-  display: grid; place-items: center;
-  padding: 24px;
-  text-align: center;
-  background: rgba(255,255,255,.94);
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: var(--paper);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .curtain[hidden] { display: none; }
-.curtain-inner { max-width: 380px; width: 100%; }
-.curtain-emoji { font-size: 48px; line-height: 1; margin-bottom: 12px; }
-.curtain h3 { margin: 0 0 8px; font-size: 22px; font-weight: 800; letter-spacing: -.025em; color: var(--navy); }
-.curtain p { margin: 0 0 22px; font-size: 15px; color: var(--slate); }
-.curtain .btn-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-.result-win h3 { color: var(--green-d); }
+.curtain-inner { min-height: 100%; display: flex; flex-direction: column; }
 
+/* ── Start screen ───────────────────────────────────────────────────────── */
+.sheet-intro { padding: 16px 16px 22px; gap: 14px; }
+.sheet-intro .hero {
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--sh-1);
+  border: 1px solid var(--line);
+}
+.sheet-title {
+  margin: 2px 0 0;
+  text-align: center;
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: -.03em;
+  color: var(--navy);
+}
+.sheet-line { margin: -8px 0 0; text-align: center; font-size: 15px; color: var(--slate); }
+
+.btn-wide { width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 9px; }
+.btn-wide svg { width: 19px; height: 19px; }
+
+.chips { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.chip {
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  padding: 13px 8px;
+  border-radius: var(--r);
+  background: var(--mist);
+  border: 1px solid var(--line);
+  text-align: center;
+}
+.chip svg { width: 19px; height: 19px; color: var(--navy-2); margin-bottom: 2px; }
+.chip b { font-size: 13.5px; font-weight: 700; color: var(--navy); line-height: 1.2; }
+.chip i {
+  font-style: normal;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--slate-2);
+}
+
+.others { margin-top: auto; padding-top: 8px; }
+.others-head {
+  margin: 0 0 9px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--slate-2);
+}
+.others-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; }
+.omini {
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--paper);
+  overflow: hidden;
+  display: grid;
+  transition: transform .14s ease, border-color .14s ease;
+}
+.omini .art > svg, .omini .art > .art-photo { aspect-ratio: 1 / 1; }
+.omini span {
+  padding: 5px 3px 6px;
+  font-size: 8.5px;
+  font-weight: 600;
+  line-height: 1.15;
+  text-align: center;
+  color: var(--navy);
+}
+.omini:hover { transform: translateY(-2px); border-color: var(--green); }
+
+/* ── Result screen ──────────────────────────────────────────────────────── */
+.sheet-result { position: relative; justify-content: flex-start; background: var(--mist); }
+.win-art { position: relative; flex: 0 0 auto; width: 100%; aspect-ratio: 4 / 3; }
+.win-art .art, .win-art .art > svg, .win-art .art > .art-photo {
+  position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto;
+}
+.win-art::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(20,32,74,.30) 0%, rgba(20,32,74,.06) 42%, rgba(20,32,74,.34) 100%);
+}
+.ribbon {
+  position: absolute;
+  left: 50%;
+  top: 26px;
+  transform: translateX(-50%) rotate(-2.2deg);
+  z-index: 2;
+  padding: 11px 22px;
+  background: var(--paper);
+  border-radius: 14px;
+  box-shadow: 0 8px 22px rgba(20,32,74,.25);
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -.02em;
+  color: var(--green-d);
+  white-space: nowrap;
+}
+.is-lose .ribbon { color: var(--navy); }
+
+.win-card {
+  position: relative;
+  z-index: 2;
+  margin: -34px 16px 0;
+  padding: 20px 18px 18px;
+  background: var(--paper);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-2);
+  display: grid;
+  gap: 10px;
+  text-align: center;
+}
+.win-card h3 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -.025em; color: var(--navy); }
+.is-win .win-card h3 { color: var(--green-d); }
+.win-card p { margin: -4px 0 6px; font-size: 14.5px; color: var(--slate); }
+
+.win-sign {
+  margin: 16px 0 24px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--slate-2);
+}
+
+/* Confetti-free by design: the ribbon and the photo carry the moment. */
 .btn {
   font: inherit; font-weight: 700; font-size: 15px;
   cursor: pointer;
-  padding: 13px 22px;
-  min-height: 48px;
+  padding: 14px 22px;
+  min-height: 52px;
   border-radius: var(--pill);
   border: 1.5px solid transparent;
   transition: transform .14s ease, background-color .14s ease;
@@ -434,7 +577,6 @@ img { display: block; max-width: 100%; }
 .btn-go:hover { background: var(--green-d); }
 .btn-quiet { background: var(--paper); color: var(--navy); border-color: var(--line-2); }
 .btn-quiet:hover { background: var(--mist); }
-
 /* ── DOM-based games ────────────────────────────────────────────────────── */
 .dom-game {
   position: absolute; inset: 0;

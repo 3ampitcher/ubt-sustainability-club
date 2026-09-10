@@ -175,7 +175,7 @@
     id: 'turtle',
     name: 'Save the Turtle',
     emoji: '🐢',
-    art: 'art-turtle', kind: 'Reflex',
+    art: 'art-turtle', kind: 'Reflex', secs: '15 seconds', goal: 'Get her to safe water',
     instruction: 'Tap the trash before it reaches the turtle.',
     startLabel: 'Start',
     start: function (api) {
@@ -346,7 +346,7 @@
     id: 'race',
     name: 'Eco Race',
     emoji: '🏁',
-    art: 'art-race', kind: 'Race',
+    art: 'art-race', kind: 'Race', secs: '20 seconds', goal: 'Cross the line first',
     instruction: 'Collect energy. Avoid waste. Finish first.',
     startLabel: 'Start the race',
     start: function (api) {
@@ -535,7 +535,7 @@
     id: 'bin',
     name: 'Bin It',
     emoji: '♻️',
-    art: 'art-bin', kind: 'Speed',
+    art: 'art-bin', kind: 'Speed', secs: '5 items', goal: 'Sort 4 of 5 right',
     instruction: 'Put 5 items in the right bin.',
     startLabel: 'Start',
     start: function (api) {
@@ -651,7 +651,7 @@
     id: 'cook',
     name: "Don't Cook the Planet",
     emoji: '🌍',
-    art: 'art-earth', kind: 'Awareness',
+    art: 'art-earth', kind: 'Awareness', secs: '8 seconds', goal: 'Cool it to 36°',
     instruction: 'Tap as fast as you can.',
     startLabel: 'Start',
     start: function (api) {
@@ -729,7 +729,7 @@
     id: 'drop',
     name: 'Drop Catch',
     emoji: '💧',
-    art: 'art-drop', kind: 'Skill',
+    art: 'art-drop', kind: 'Skill', secs: '20 seconds', goal: 'Catch 8 drops',
     instruction: 'Catch water. Avoid trash.',
     startLabel: 'Start',
     start: function (api) {
@@ -886,7 +886,7 @@
     id: 'power',
     name: 'Power UBT',
     emoji: '⚡',
-    art: 'art-power', kind: 'Strategy',
+    art: 'art-power', kind: 'Strategy', secs: '3 choices', goal: 'Reach a score of 70',
     instruction: 'Make 3 choices. Reach the target.',
     startLabel: 'Start',
     start: function (api) {
@@ -966,14 +966,29 @@
   /* ===========================================================
      Host — cards, overlay, lifecycle
      =========================================================== */
+
+  /* A card's artwork. The SVG illustration always renders; if a real image
+     has been added at assets/games/<id>.jpg it loads on top and wins. Drop
+     images in to replace the illustrations without touching any code. */
+  function artHtml(g) {
+    var id = g.art.replace('art-', '');
+    return '<span class="art">' +
+             '<svg viewBox="0 0 160 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="#' + g.art + '"></use></svg>' +
+             '<img class="art-photo" src="assets/games/' + id + '.jpg" alt="">' +
+           '</span>';
+  }
+  /* error does not bubble, so listen in the capture phase */
+  document.addEventListener('error', function (ev) {
+    var t = ev.target;
+    if (t && t.classList && t.classList.contains('art-photo')) t.style.display = 'none';
+  }, true);
+
   var GAMES = [gameTurtle, gameRace, gameBin, gameCook, gameDrop, gamePower];
 
   var grid = document.getElementById('gamesGrid');
   var overlay = document.getElementById('overlay');
   var panel = document.getElementById('overlayPanel');
   var closeBtn = document.getElementById('overlayClose');
-  var titleEl = document.getElementById('gameTitle');
-  var kickerEl = document.getElementById('gameKicker');
   var hudEl = document.getElementById('hud');
   var fieldEl = document.getElementById('field');
   var curtain = document.getElementById('curtain');
@@ -992,8 +1007,7 @@
     card.type = 'button';
     card.className = 'gcard';
     card.innerHTML =
-      '<span class="gcard-art"><svg viewBox="0 0 160 100" aria-hidden="true">' +
-        '<use href="#' + g.art + '"></use></svg></span>' +
+      '<span class="gcard-art">' + artHtml(g) + '</span>' +
       '<span class="gcard-foot">' +
         '<span class="gcard-text">' +
           '<span class="gcard-name">' + g.name + '</span>' +
@@ -1017,11 +1031,11 @@
     lastFocus = fromEl || document.activeElement;
     teardown();
     current = g;
-    titleEl.textContent = g.name;
-    kickerEl.textContent = 'Mini-game';
+    overlay.setAttribute('aria-label', g.name);
     overlay.hidden = false;
     document.body.classList.add('locked');
     showIntro();
+    curtain.scrollTop = 0;
     closeBtn.focus({ preventScroll: true });
   }
 
@@ -1041,26 +1055,52 @@
 
   function showIntro() {
     var g = current;
-    showCurtain('', [
-      '<div class="curtain-emoji">' + g.emoji + '</div>',
-      '<h3>' + g.name + '</h3>',
-      '<p>' + g.instruction + '</p>',
-      '<div class="btn-row">',
-      '<button class="btn btn-go" data-act="start">' + (g.startLabel || 'Start') + '</button>',
-      '<button class="btn btn-quiet" data-act="back">Back to Games</button>',
+    var others = GAMES.filter(function (x) { return x !== g; });
+    showCurtain('sheet-intro', [
+      '<div class="hero">' + artHtml(g) + '</div>',
+      '<h3 class="sheet-title">' + g.name + '</h3>',
+      '<p class="sheet-line">' + g.instruction + '</p>',
+      '<button class="btn btn-go btn-wide" data-act="start">Start Game</button>',
+      '<div class="chips">',
+        '<div class="chip">',
+          '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20m0 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16m-1 3v6l5 3 1-1.7-4-2.3V7z"/></svg>',
+          '<b>' + g.secs + '</b><i>How long</i>',
+        '</div>',
+        '<div class="chip">',
+          '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 3h10v2h4v3a4 4 0 0 1-3.6 4A6 6 0 0 1 13 15.9V18h3v3H8v-3h3v-2.1A6 6 0 0 1 6.6 12 4 4 0 0 1 3 8V5h4zM5 7v1a2 2 0 0 0 1.2 1.8L6 8V7zm14 0h-2v1l-.2 1.8A2 2 0 0 0 19 8z"/></svg>',
+          '<b>' + g.goal + '</b><i>To win</i>',
+        '</div>',
+      '</div>',
+      '<div class="others">',
+        '<p class="others-head">Other Games</p>',
+        '<div class="others-row">',
+          others.map(function (o) {
+            return '<button class="omini" data-jump="' + o.id + '">' +
+                     artHtml(o) +
+                     '<span>' + o.name + '</span>' +
+                   '</button>';
+          }).join(''),
+        '</div>',
       '</div>'
     ].join(''));
   }
 
   function showResult(won, detail) {
-    showCurtain(won ? 'result-win' : 'result-lose', [
-      '<div class="curtain-emoji">' + (won ? '🎉' : '😅') + '</div>',
-      '<h3>' + (won ? 'You win!' : 'Not this time') + '</h3>',
-      '<p>' + (detail || '') + '</p>',
-      '<div class="btn-row">',
-      '<button class="btn btn-go" data-act="again">Play Again</button>',
-      '<button class="btn btn-quiet" data-act="back">Back to Games</button>',
-      '</div>'
+    var g = current;
+    showCurtain('sheet-result ' + (won ? 'is-win' : 'is-lose'), [
+      '<div class="win-art">' + artHtml(g) + '<span class="ribbon">' +
+        (won ? 'You did it!' : 'So close!') + '</span></div>',
+      '<div class="win-card">',
+        '<h3>' + (won ? 'Great job!' : 'Nearly there') + '</h3>',
+        '<p>' + (detail || '') + '</p>',
+        '<button class="btn btn-go btn-wide" data-act="again">',
+          '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 5V2L8 6l4 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7"/></svg>',
+          'Play Again</button>',
+        '<button class="btn btn-quiet btn-wide" data-act="back">',
+          '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20 11H7.8l5.6-5.6L12 4l-8 8 8 8 1.4-1.4L7.8 13H20z"/></svg>',
+          'Back to Games</button>',
+      '</div>',
+      '<p class="win-sign">Small actions. A bigger tomorrow.</p>'
     ].join(''));
   }
 
@@ -1101,6 +1141,13 @@
 
   /* Curtain buttons are re-created each time, so delegate. */
   curtain.addEventListener('click', function (ev) {
+    var jump = ev.target.closest('[data-jump]');
+    if (jump) {
+      var id = jump.getAttribute('data-jump');
+      var next = GAMES.filter(function (g) { return g.id === id; })[0];
+      if (next) openGame(next, lastFocus);
+      return;
+    }
     var btn = ev.target.closest('[data-act]');
     if (!btn) return;
     var act = btn.getAttribute('data-act');
