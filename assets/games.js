@@ -175,7 +175,7 @@
     id: 'turtle',
     name: 'Save the Turtle',
     emoji: '🐢',
-    tagline: 'Clear the plastic', tint: '#35B39B',
+    art: 'art-turtle', kind: 'Reflex',
     instruction: 'Tap the trash before it reaches the turtle.',
     startLabel: 'Start',
     start: function (api) {
@@ -183,14 +183,14 @@
       var c = setupCanvas(rt, api.field);
       var ctx = c.ctx, view = c.view;
 
-      var TIME = 10;            // hard time limit
-      var CROSS = 8;            // seconds of clean swimming to reach safety
-      var MAX_HITS = 3;
+      var TIME = 15;            // hard time limit
+      var CROSS = 12;           // seconds of clean swimming to reach safety
+      var MAX_HITS = 4;
       var TRASH = ['🥤', '🛍️', '🧴', '🥫', '🧃', '🍬'];
 
       var t = 0, progress = 0, hits = 0, cleared = 0, stall = 0;
       var trash = [], pops = [], bubbles = [];
-      var nextSpawn = 0.45;
+      var nextSpawn = 1.3;
 
       for (var i = 0; i < 16; i++) {
         bubbles.push({ x: rnd(0, 1), y: rnd(0, 1), r: rnd(1.5, 4), sp: rnd(0.03, 0.09) });
@@ -224,7 +224,7 @@
         trash.push({
           x: x, y: y,
           ch: TRASH[irnd(0, TRASH.length - 1)],
-          sp: rnd(52, 76) * view.s,
+          sp: rnd(40, 55) * view.s,
           spin: rnd(-2, 2),
           rot: rnd(0, 6.28),
           r: 25 * view.s
@@ -256,7 +256,7 @@
         else progress = Math.min(1, progress + dt / CROSS);
 
         nextSpawn -= dt;
-        if (nextSpawn <= 0 && t < TIME - 1.2) { spawn(); nextSpawn = rnd(0.72, 1.02); }
+        if (nextSpawn <= 0 && t < TIME - 1.6) { spawn(); nextSpawn = rnd(1.0, 1.35); }
 
         var tp = turtlePos();
         for (var i = trash.length - 1; i >= 0; i--) {
@@ -268,7 +268,7 @@
           o.rot += o.spin * dt;
           if (d < 30 * view.s) {
             trash.splice(i, 1);
-            hits++; stall += 0.8;
+            hits++; stall += 0.9;
             hud();
             if (hits >= MAX_HITS) { api.end(false, 'Too much plastic reached her.'); return; }
           }
@@ -288,8 +288,8 @@
 
         /* --- draw --- */
         var g = ctx.createLinearGradient(0, 0, 0, view.h);
-        g.addColorStop(0, '#7FCFE4');
-        g.addColorStop(1, '#1E6C92');
+        g.addColorStop(0, '#A8E7F7');
+        g.addColorStop(1, '#2E9AC8');
         ctx.fillStyle = g;
         ctx.fillRect(0, 0, view.w, view.h);
 
@@ -346,7 +346,7 @@
     id: 'race',
     name: 'Eco Race',
     emoji: '🏁',
-    tagline: 'Beat the rival', tint: '#6F86D6',
+    art: 'art-race', kind: 'Race',
     instruction: 'Collect energy. Avoid waste. Finish first.',
     startLabel: 'Start the race',
     start: function (api) {
@@ -354,11 +354,11 @@
       var c = setupCanvas(rt, api.field);
       var ctx = c.ctx, view = c.view;
 
-      var TRACK = 2000;         // track length in world units
+      var TRACK = 2900;         // track length in world units
       var PPU = 0.52;           // pixels per unit on screen
-      var BASE = 146;           // player base speed
-      var OPP = 149;            // rival speed
-      var GUARD = 26;           // absolute safety timeout (s)
+      var BASE = 150;           // player base speed
+      var OPP = 153;            // rival speed
+      var GUARD = 34;           // absolute safety timeout (s)
 
       var t = 0, pd = 0, od = 0, bonus = 0, slow = 0, boosts = 0, bumps = 0;
       var roadW, roadX, playerX, targetX;
@@ -380,7 +380,7 @@
         var d = 300;
         var boostCount = 0;
         while (d < TRACK - 150) {
-          var isBoost = boostCount < 8 && (Math.random() < 0.55 || boostCount < (d / TRACK) * 7);
+          var isBoost = boostCount < 11 && (Math.random() < 0.55 || boostCount < (d / TRACK) * 10);
           var lane = lanes[irnd(0, 2)];
           items.push({ d: d, lane: lane, kind: isBoost ? 'boost' : 'waste', got: false });
           if (isBoost) boostCount++;
@@ -452,9 +452,9 @@
         if (t >= GUARD) { api.end(false, 'Out of time.'); return; }
 
         /* --- draw --- */
-        ctx.fillStyle = '#26543A';
+        ctx.fillStyle = '#CFEDC8';
         ctx.fillRect(0, 0, view.w, view.h);
-        ctx.fillStyle = '#232C55';
+        ctx.fillStyle = '#39426B';
         ctx.fillRect(roadX, 0, roadW, view.h);
 
         /* lane dashes scrolling with distance */
@@ -501,10 +501,13 @@
           var ox = roadX + o.lane * roadW;
           if (o.kind === 'boost') {
             ctx.beginPath();
-            ctx.fillStyle = 'rgba(255,255,255,.22)';
+            ctx.fillStyle = 'rgba(255,255,255,.9)';
             ctx.arc(ox, oy, 20 * view.s, 0, 6.29); ctx.fill();
             drawEmoji(ctx, '⚡', ox, oy, 28 * view.s);
           } else {
+            ctx.beginPath();
+            ctx.fillStyle = 'rgba(255,255,255,.9)';
+            ctx.arc(ox, oy, 20 * view.s, 0, 6.29); ctx.fill();
             drawEmoji(ctx, '🛢️', ox, oy, 28 * view.s);
           }
         }
@@ -532,7 +535,7 @@
     id: 'bin',
     name: 'Bin It',
     emoji: '♻️',
-    tagline: 'Sort five items', tint: '#56B84A',
+    art: 'art-bin', kind: 'Speed',
     instruction: 'Put 5 items in the right bin.',
     startLabel: 'Start',
     start: function (api) {
@@ -558,7 +561,7 @@
       ];
 
       var ROUNDS = 5;
-      var PER_ITEM = 4.2;
+      var PER_ITEM = 6.5;
       var items = shuffle(POOL).slice(0, ROUNDS);
       var idx = 0, score = 0, left = PER_ITEM, answered = false;
 
@@ -619,7 +622,7 @@
           else if (b === btn && !ok) b.className = 'bin-btn wrong';
         });
         hud();
-        rt.timeout(next, ok ? 480 : 900);
+        rt.timeout(next, ok ? 700 : 1400);
       }
 
       function next() {
@@ -648,15 +651,15 @@
     id: 'cook',
     name: "Don't Cook the Planet",
     emoji: '🌍',
-    tagline: 'Tap to cool', tint: '#F0A93C',
+    art: 'art-earth', kind: 'Awareness',
     instruction: 'Tap as fast as you can.',
     startLabel: 'Start',
     start: function (api) {
       var rt = api.rt;
-      var TIME = 5.0;
+      var TIME = 8.0;
       var START_T = 41.5, TARGET = 36.0, MAXT = 46;
-      var WARM = 0.85;      // degrees gained per second
-      var COOL = 0.45;      // degrees lost per tap
+      var WARM = 0.62;      // degrees gained per second
+      var COOL = 0.42;      // degrees lost per tap
 
       var t = 0, temp = START_T, taps = 0;
 
@@ -726,7 +729,7 @@
     id: 'drop',
     name: 'Drop Catch',
     emoji: '💧',
-    tagline: 'Catch the water', tint: '#4FA8D8',
+    art: 'art-drop', kind: 'Skill',
     instruction: 'Catch water. Avoid trash.',
     startLabel: 'Start',
     start: function (api) {
@@ -734,7 +737,7 @@
       var c = setupCanvas(rt, api.field);
       var ctx = c.ctx, view = c.view;
 
-      var TIME = 14, NEED = 7, MAX_TRASH = 3;
+      var TIME = 20, NEED = 8, MAX_TRASH = 3;
       var TRASH = ['🗑️', '🛍️', '🥫', '🧴'];
 
       var t = 0, caught = 0, junk = 0, missed = 0;
@@ -786,12 +789,12 @@
           drops.push({
             x: rnd(28 * view.s, view.w - 28 * view.s),
             y: -28 * view.s,
-            v: rnd(180, 250) * view.s,
+            v: rnd(140, 195) * view.s,
             trash: isTrash,
             ch: isTrash ? TRASH[irnd(0, TRASH.length - 1)] : '💧',
             wob: rnd(0, 6.28)
           });
-          nextSpawn = rnd(0.30, 0.46);
+          nextSpawn = rnd(0.40, 0.58);
         }
 
         var by = bucketY(), bw = bucketW();
@@ -827,16 +830,21 @@
 
         /* --- draw --- */
         var g = ctx.createLinearGradient(0, 0, 0, view.h);
-        g.addColorStop(0, '#BBD9F2');
-        g.addColorStop(1, '#6D9CC4');
+        g.addColorStop(0, '#E4F3FF');
+        g.addColorStop(1, '#8FC4E8');
         ctx.fillStyle = g;
         ctx.fillRect(0, 0, view.w, view.h);
 
-        ctx.fillStyle = 'rgba(11,17,48,.16)';
+        ctx.fillStyle = 'rgba(20,32,79,.10)';
         ctx.fillRect(0, by + 16 * view.s, view.w, view.h);
 
         for (var k = 0; k < drops.length; k++) {
-          drawEmoji(ctx, drops[k].ch, drops[k].x, drops[k].y, (drops[k].trash ? 30 : 28) * view.s);
+          var dr = drops[k];
+          ctx.beginPath();
+          ctx.fillStyle = dr.trash ? 'rgba(229,72,77,.20)' : 'rgba(255,255,255,.75)';
+          ctx.arc(dr.x, dr.y, 21 * view.s, 0, 6.29);
+          ctx.fill();
+          drawEmoji(ctx, dr.ch, dr.x, dr.y, (dr.trash ? 32 : 30) * view.s);
         }
 
         for (var sp = 0; sp < splashes.length; sp++) {
@@ -854,7 +862,7 @@
 
         /* bucket */
         ctx.save();
-        ctx.fillStyle = '#101838';
+        ctx.fillStyle = '#16204A';
         ctx.beginPath();
         var half = bw / 2;
         ctx.moveTo(bx - half, by - 8 * view.s);
@@ -878,7 +886,7 @@
     id: 'power',
     name: 'Power UBT',
     emoji: '⚡',
-    tagline: 'Three upgrades', tint: '#E0C24A',
+    art: 'art-power', kind: 'Strategy',
     instruction: 'Make 3 choices. Reach the target.',
     startLabel: 'Start',
     start: function (api) {
@@ -950,7 +958,7 @@
           }
           btns.forEach(function (x) { if (!x.classList.contains('picked')) x.disabled = false; });
           busy = false;
-        }, 700);
+        }, 1100);
       }
     }
   };
@@ -980,14 +988,20 @@
 
   /* --- cards --- */
   GAMES.forEach(function (g) {
-    var card = el('button', 'game-card');
+    var card = el('button');
     card.type = 'button';
-    card.style.setProperty('--tint', g.tint);
-    card.appendChild(el('span', 'game-emblem', g.emoji));
-    var text = el('span', 'game-text');
-    text.appendChild(el('span', 'game-name', g.name));
-    text.appendChild(el('span', 'game-tag', g.tagline));
-    card.appendChild(text);
+    card.className = 'gcard';
+    card.innerHTML =
+      '<span class="gcard-art"><svg viewBox="0 0 160 100" aria-hidden="true">' +
+        '<use href="#' + g.art + '"></use></svg></span>' +
+      '<span class="gcard-foot">' +
+        '<span class="gcard-text">' +
+          '<span class="gcard-name">' + g.name + '</span>' +
+          '<span class="gcard-kind">' + g.kind + '</span>' +
+        '</span>' +
+        '<svg class="gcard-go" viewBox="0 0 24 24" aria-hidden="true">' +
+          '<path fill="currentColor" d="m9.3 6.7 1.4-1.4 6.7 6.7-6.7 6.7-1.4-1.4 5.3-5.3z"></path></svg>' +
+      '</span>';
     card.addEventListener('click', function () { openGame(g, card); });
     grid.appendChild(card);
   });
