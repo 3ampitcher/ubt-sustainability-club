@@ -86,6 +86,9 @@ body {
 body.locked { overflow: hidden; }
 
 img { display: block; max-width: 100%; }
+
+/* A `display` rule in a component must never out-rank the hidden attribute. */
+[hidden] { display: none !important; }
 ::selection { background: rgba(86,184,74,.28); }
 :focus-visible { outline: 2px solid var(--green); outline-offset: 3px; border-radius: 10px; }
 
@@ -115,7 +118,14 @@ img { display: block; max-width: 100%; }
 
 /* ── 1 · Logo ─────────────────────────────────────────────────────────── */
 .mast { display: flex; justify-content: flex-end; min-height: 46px; }
-.mast-logo { width: 132px; height: auto; }
+/* The supplied logo file is a square canvas with wide blank margins around
+   the mark (artwork 704x332 inside 1100x1042). The box below shows only the
+   artwork region — the file and the mark itself are untouched, we just stop
+   rendering the empty canvas around it. */
+.logo-box { display: block; overflow: hidden; aspect-ratio: 1100 / 380; flex: none; }
+.logo-box img { width: 100%; height: 100%; object-fit: cover; }
+.logo-mast { width: 150px; }
+.logo-screen { margin-left: auto; width: 104px; }
 .mast-fallback { display: grid; justify-items: end; line-height: 1.02; }
 .mast-fallback b { font-size: 25px; font-weight: 800; letter-spacing: -.02em; color: var(--navy-2); }
 .mast-fallback i { font-style: normal; font-size: 11px; font-weight: 700; color: var(--navy-2); }
@@ -354,7 +364,7 @@ img { display: block; max-width: 100%; }
 }
 .back svg { width: 19px; height: 19px; }
 .back:hover { background: var(--mist); }
-.screen-logo { margin-left: auto; width: 88px; height: auto; }
+
 
 .screen-body { position: relative; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
 
