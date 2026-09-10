@@ -1,0 +1,28 @@
+# Keeps the live site in step with main.
+#
+# Pages here publishes from the gh-pages branch — that branch is what got
+# Pages provisioned in the first place, and it is a plain mirror of main, not
+# somewhere to edit. This copies main onto it after every push, which is what
+# triggers GitHub's own pages build. Nothing here builds the site: it is
+# static files and they ship exactly as they are committed.
+name: Publish main to gh-pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Mirror main onto gh-pages
+        run: git push --force origin HEAD:gh-pages
